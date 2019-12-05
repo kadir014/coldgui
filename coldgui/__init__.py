@@ -2,7 +2,7 @@ version = "0.0.0"
 version_tuple = (0, 0, 0)
 state = "Alpha"
 author = "Kadir Aksoy"
-license = "GNU Lesser General Public License v3.0"
+license = "GNU General Public License v3.0"
 
 from .errors import MultipleInstanceError, InstanceMemory
 
