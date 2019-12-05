@@ -8,7 +8,6 @@ class Frame:
 
         self.widgets = list()
         self.parent = parent
-        print(self.parent)
         self.parent.add(self)
 
         self._position = position

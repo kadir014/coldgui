@@ -1,6 +1,6 @@
 version = "0.0.0"
 version_tuple = (0, 0, 0)
-state = "In-dev"
+state = "Alpha"
 author = "Kadir Aksoy"
 license = "GNU Lesser General Public License v3.0"
 
