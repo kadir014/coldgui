@@ -16,11 +16,11 @@ class TextBox:
         self.border_size = border_size
 
         if width == 0: self._width = (self.font.size("\u2588")[0] * 10) + self.border_size * 2 + padding * 2
-        else: self._width = width# - self.border_size * 2 + padding * 2
+        else: self._width = width + self.border_size * 2 + padding * 2
 
         self.line_height = self.font.size("\u2588")[1]
         if height == 0: self._height = self.line_height + self.border_size * 2 + padding * 2
-        else: self._height = height# - self.border_size * 2 + padding * 2
+        else: self._height = height + self.border_size * 2 + padding * 2
 
         self._position = position
         self._padding = padding
@@ -56,13 +56,15 @@ class TextBox:
         self.selectable = selectable
         self.selecting = False
         self.selected = False
-        self.start_x = (0, 0)
-        self.mmx = (0, 0)
+        self.start_x = (0, 0, False)
+        self.mmx = (0, 0, False)
 
         self._visible = visible
         self._active = active
         self.event_funcs = dict()
+
         self.surface = pygame.Surface((self._width, self._height))
+        self.surface = self.surface.convert_alpha()
 
         self.render(True)
 
@@ -85,9 +87,13 @@ class TextBox:
 
             if (self.selecting and len(self.lines[self.cursor_y]) > 0) or self.selected:
                 if self.mmx != self.start_x:
-                    mmx2 = self.font.size(self.lines[self.cursor_y][self.mmx[0]])[0]/2
-                    stx2 = self.font.size(self.lines[self.cursor_y][self.start_x[0]])[0]/2
-                    pygame.draw.rect(self.surface, (111, 164, 237), (self.mmx[1] - mmx2 - self.scroll_x, self.border_size + self.padding, (self.start_x[1] - stx2) - (self.mmx[1] - mmx2), self.height - (self.border_size + self.padding*2)))
+                    if self.start_x[2]: stx = self.font.size(self.lines[self.cursor_y][0:self.start_x[0] + 1])[0]
+                    else: stx = self.font.size(self.lines[self.cursor_y][0:self.start_x[0]])[0]
+
+                    if self.mmx[2]: mmx = self.font.size(self.lines[self.cursor_y][0:self.mmx[0] + 1])[0]
+                    else: mmx = self.font.size(self.lines[self.cursor_y][0:self.mmx[0]])[0]
+
+                    pygame.draw.rect(self.surface, (111, 164, 237), (stx - self.scroll_x + self.border_size + self.padding, self.border_size + self.padding, mmx - stx, self.height - (self.border_size + self.padding*2)))
 
             if placeholder:
                 self.surface.blit(self.font.render(self.placeholder, True, self.placeholder_fore_color), (self.border_size + self.padding, self.border_size + self.padding))
@@ -131,19 +137,27 @@ class TextBox:
         if len(self.width_list) > 0:
             i = 0
             str = 0
-            while i < len(self.width_list)- 1:
-                str += self.width_list[i]
+            l_str = 0
+
+            while i < len(self.width_list) - 1:
+                half = False
+
+                #str += self.width_list[i]
+                #l_str = self.width_list[i]
+                str = self.font.size(self.lines[self.cursor_y][0:i])[0]
+                l_str = self.font.size(self.lines[self.cursor_y][i])[0]
 
                 i += 1
 
-                if rmx < str: break
+                if rmx < str + l_str - l_str / 2: half = True
+                if rmx < str + l_str: break
 
-            return i-1, str
+            return i-1, str - l_str, not half
 
     def handle_select(self):
         #Get cursor x related to text
         if len(self.lines[self.cursor_y]) > 0:
-            rmx = (pygame.mouse.get_pos()[0] + self.scroll_x - (self.position[0] + self.parent.position[0])) - self.border_size - self.padding
+            rmx = pygame.mouse.get_pos(0)[0] + self.scroll_x - self.abs_position[0] - (self.border_size + self.padding)
             self.get_width_list()
             self.mmx = self.get_mouse_x(rmx)
             if self.selecting: self.render()
@@ -153,6 +167,20 @@ class TextBox:
             mx, my = pygame.mouse.get_pos()
 
             if RUNTIME.keyboard_focus == self:
+                if self.selecting:
+                    if mx > self.abs_position[0] + self.width - (self.padding + self.border_size):
+                        if self.scroll_x < self.font.size(self.lines[self.cursor_y])[0] - (self.width - (self.padding + self.border_size)):
+                            self.scroll_x += mx - (self.abs_position[0] + self.width - (self.padding + self.border_size))
+
+                            if self.scroll_x > self.font.size(self.lines[self.cursor_y])[0] - (self.width - (self.padding + self.border_size)):
+                                self.scroll_x = self.font.size(self.lines[self.cursor_y])[0] - (self.width - (self.padding + self.border_size))
+
+                    elif mx < self.abs_position[0] + self.border_size + self.padding:
+                        if self.scroll_x > 0:
+                            self.scroll_x += mx - (self.abs_position[0] + self.padding + self.border_size)
+                            #Relocate the scroll x if it gets scrolled too much
+                            if self.scroll_x < 0:
+                                self.scroll_x = 0
                 self.handle_select()
 
             if pygame.Rect(self.position, (self.width, self.height)).collidepoint((mx - self.parent.position[0], my - self.parent.position[1])):
@@ -184,10 +212,23 @@ class TextBox:
                             if "released" in self.event_funcs: self.event_funcs["released"]()
                             if "clicked" in self.event_funcs and self.hover: self.event_funcs["clicked"]()
                             RUNTIME.focus = None
+
                         if RUNTIME.keyboard_focus == self:
                             self.selecting = False
-                            if self.mmx != self.start_x: self.selected = True
-                            self.cursor_x = self.mmx[0]
+                            if self.mmx != self.start_x:
+                                self.selected = True
+
+                                if self.start_x[2]: stx = self.start_x[0] + 1
+                                else: stx = self.start_x[0]
+
+                                if self.mmx[2]: mmx = self.mmx[0] + 1
+                                else: mmx = self.mmx[0]
+
+                                #print(self.lines[self.cursor_y][stx:mmx])
+
+                            if self.mmx[2] > 0: self.cursor_x = self.mmx[0] + 1
+                            else: self.cursor_x = self.mmx[0]
+
                         self.pressed = False
                         self.hover = False
                         if RUNTIME.keyboard_focus == self: self.render()

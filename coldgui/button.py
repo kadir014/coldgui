@@ -21,10 +21,10 @@ class Button:
         if font: self.font = pygame.font.Font(font, self.font_size)
         else: self.font = pygame.font.SysFont(sysfont, self.font_size)
 
-        self._width = width
-        self._height = height
-        if self._width == 0: self._width = self.font.size(self._text)[0] + border_size * 4 + 10 + self.padding
-        if self._height == 0: self._height = self.font.size(self._text)[1] + border_size * 2 + 10 + self.padding
+        self._width = width + border_size * 2 + self.padding * 2
+        self._height = height + border_size * 2 + self.padding * 2
+        if width == 0: self._width = self.font.size(self._text)[0] + border_size * 4 + 10 + self.padding
+        if height == 0: self._height = self.font.size(self._text)[1] + border_size * 2 + 10 + self.padding
 
         self.style = style
 
@@ -43,7 +43,9 @@ class Button:
         self._visible = visible
         self._active = active
         self.event_funcs = dict()
+
         self.surface = pygame.Surface((self.width, self.height))
+        self.surface = self.surface.convert_alpha()
 
         self.render()
 

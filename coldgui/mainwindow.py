@@ -42,6 +42,7 @@ class MainWindow():
             if event.type == pygame.QUIT: self.running = False
 
         self.frame.update()
+
         self.surface.blit(self.frame.surface, self.frame.position)
 
         pygame.display.flip()

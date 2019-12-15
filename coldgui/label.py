@@ -22,7 +22,9 @@ class Label:
         self._visible = visible
         self._active = active
         self.event_funcs = dict()
+
         self.surface = pygame.Surface(self.font.size(self.text))
+        self.surface = self.surface.convert_alpha()
 
         self.render()
 

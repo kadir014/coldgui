@@ -31,7 +31,9 @@ class Frame:
         self._visible = visible
         self._active = active
         self.event_funcs = dict()
+
         self.surface = pygame.Surface((self.width, self.height))
+        self.surface = self.surface.convert_alpha()
 
         self.render()
 
