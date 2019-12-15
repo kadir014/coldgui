@@ -218,11 +218,11 @@ class TextBox:
                             if self.mmx != self.start_x:
                                 self.selected = True
 
-                                if self.start_x[2]: stx = self.start_x[0] + 1
-                                else: stx = self.start_x[0]
+                                #if self.start_x[2]: stx = self.start_x[0] + 1
+                                #else: stx = self.start_x[0]
 
-                                if self.mmx[2]: mmx = self.mmx[0] + 1
-                                else: mmx = self.mmx[0]
+                                #if self.mmx[2]: mmx = self.mmx[0] + 1
+                                #else: mmx = self.mmx[0]
 
                                 #print(self.lines[self.cursor_y][stx:mmx])
 
