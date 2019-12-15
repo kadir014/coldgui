@@ -1,5 +1,4 @@
 import pygame
-from . import errors
 from . import RUNTIME
 
 class Frame:
