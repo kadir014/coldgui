@@ -5,3 +5,5 @@ class InstanceMemory:
 class MultipleInstanceError(Exception): pass
 
 class UnknownAlignError(Exception): pass
+
+class OutOfListBox(Exception): pass

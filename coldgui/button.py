@@ -1,6 +1,7 @@
 import pygame
 from . import errors
 from . import RUNTIME
+from . import CENTER
 
 class Button:
 
@@ -14,8 +15,6 @@ class Button:
         self._text = text
         self._text_align = text_align
         self._padding = padding
-
-        self.get_abs_position()
 
         self.font_size = font_size
         if font: self.font = pygame.font.Font(font, self.font_size)
@@ -40,6 +39,12 @@ class Button:
         self.hover = False
         self.pressed = False
 
+        #Apply constants
+        if CENTER in self._position: self._position = list(self._position)
+        if self._position[0] == CENTER: self._position[0] = (self.parent.width - (self.parent.border_size * 2 + self.parent.padding * 2)) / 2 - self.width / 2
+        if self._position[1] == CENTER: self._position[1] = (self.parent.height - (self.parent.border_size * 2 + self.parent.padding * 2)) / 2 - self.height / 2
+        self._position = tuple(self._position)
+
         self._visible = visible
         self._active = active
         self.event_funcs = dict()
@@ -47,6 +52,7 @@ class Button:
         self.surface = pygame.Surface((self.width, self.height))
         self.surface = self.surface.convert_alpha()
 
+        self.get_abs_position()
         self.render()
 
     def event(self, func):
@@ -193,7 +199,9 @@ class Button:
 
     @x.setter
     def x(self, x):
+        self._position = list(self._position)
         self._position[0] = x
+        self._position = tuple(self._position)
         self.get_abs_position()
         if "position_changed" in self.event_funcs: self.event_funcs["position_changed"]()
 
@@ -203,7 +211,9 @@ class Button:
 
     @y.setter
     def y(self, y):
+        self._position = list(self._position)
         self._position[1] = y
+        self._position = tuple(self._position)
         self.get_abs_position()
         if "position_changed" in self.event_funcs: self.event_funcs["position_changed"]()
 

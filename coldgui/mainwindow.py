@@ -7,7 +7,7 @@ im = errors.InstanceMemory()
 
 class MainWindow():
 
-    def __init__(self, size, title="GUI Project", icon=None, fps=60, body_color=(219, 215, 204)):
+    def __init__(self, size, title="coldGUI Window", icon=None, fps=60, body_color=(219, 215, 204)):
 
         if len(im.instances) == 1:
             raise errors.MultipleInstanceError(f"Pygame {pygame.version.ver} doesn't support multiple windows in one process.")
@@ -30,6 +30,8 @@ class MainWindow():
 
         self.frame = Frame(self, position=(0, 0), width=self.size[0], height=self.size[1], show_borders=False, tag="mainwindow-frame")
         self.position = self.frame.position
+        self.width, self.height = self.frame.width, self.frame.height
+        self.border_size, self.padding = self.frame.border_size, self.frame.padding
 
         self.running = False
 

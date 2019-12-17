@@ -20,11 +20,15 @@ class RuntimeGlobalObject:
 
 RUNTIME = RuntimeGlobalObject()
 
+#Constants
+CENTER = "center"
+
 from .mainwindow import MainWindow
 from .frame import Frame
 from .label import Label
 from .button import Button
 from .textbox import TextBox
+from .listbox import ListBox
 
 import os
 import pygame.version

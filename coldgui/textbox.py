@@ -1,6 +1,7 @@
 import pygame
 from . import keys
 from . import RUNTIME
+from . import CENTER
 
 class TextBox:
     def __init__(self, parent, width=0, height=0, position=(0, 0), placeholder="", multiline=False, sysfont="Calibri", font=None, font_size=10, line_gap=3, border_size=2, padding=0, style="win95", active=True, numeric_only=False, selectable=True, tag=None, visible=True):
@@ -30,8 +31,6 @@ class TextBox:
         self.lines = ["",]
         self.tab_length = 4
 
-        self.get_abs_position()
-
         self.scroll_x = 0
         self.scroll_y = 0
         self.cursor_x = 0
@@ -59,6 +58,13 @@ class TextBox:
         self.start_x = (0, 0, False)
         self.mmx = (0, 0, False)
 
+        #Apply constants
+        if CENTER in self._position: self._position = list(self._position)
+        if self._position[0] == CENTER: self._position[0] = (self.parent.width - (self.parent.border_size * 2 + self.parent.padding * 2)) / 2 - self.width / 2
+        if self._position[1] == CENTER: self._position[1] = (self.parent.height - (self.parent.border_size * 2 + self.parent.padding * 2)) / 2 - self.height / 2
+        self._position = tuple(self._position)
+
+
         self._visible = visible
         self._active = active
         self.event_funcs = dict()
@@ -66,6 +72,7 @@ class TextBox:
         self.surface = pygame.Surface((self._width, self._height))
         self.surface = self.surface.convert_alpha()
 
+        self.get_abs_position()
         self.render(True)
 
     def event(self, func):
@@ -122,7 +129,7 @@ class TextBox:
 
             if self.padding > 0:
                 pygame.draw.rect(self.surface, self.body_color, (self.border_size / 2 + 1, self.border_size, self.padding + self.border_size/2 - 2, self.height - self.border_size*2), 0)
-                pygame.draw.rect(self.surface, self.body_color, (self.width - (self.padding + self.border_size), self.border_size, self.padding + self.border_size/2 + 1, self.height - self.border_size*2), 0)
+                pygame.draw.rect(self.surface, self.body_color, (self.width - (self.padding + self.border_size), self.border_size, self.padding + self.border_size/2 - 1, self.height - self.border_size*2), 0)
 
             if not self.active: self.surface.set_alpha(64)
 
@@ -341,7 +348,9 @@ class TextBox:
 
     @x.setter
     def x(self, x):
+        self._position = list(self._position)
         self._position[0] = x
+        self._position = tuple(self._position)
         self.get_abs_position()
         if "position_changed" in self.event_funcs: self.event_funcs["position_changed"]()
 
@@ -351,7 +360,9 @@ class TextBox:
 
     @y.setter
     def y(self, y):
+        self._position = list(self._position)
         self._position[1] = y
+        self._position = tuple(self._position)
         self.get_abs_position()
         if "position_changed" in self.event_funcs: self.event_funcs["position_changed"]()
 
